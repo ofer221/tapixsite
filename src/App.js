@@ -1,28 +1,38 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from 'react'
+import './App.css'
+import firebase from './firebase'
+import Home from './pages/Home'
 
 class App extends Component {
-  render() {
+  state={
+    mainGalleryImages:[],
+    toolsGalleryImages:[]
+  }
+  componentDidMount () {
+    this.updateGallery('mainGalleryImages', 'images/main-gallery')
+    this.updateGallery('toolsGalleryImages', 'images/tools-gallery')
+  }
+  updateGallery = (galleryName, galleryPath) => {
+    firebase.database().ref(galleryPath).once('value').then((snapshot) => {
+      //console.log(snapshot.val())
+      const urlArr = []
+      for (let key in snapshot.val()) {
+        urlArr.push(snapshot.val()[key])
+        //  urlArr.push(snapshot.val()[key]);
+      }
+      this.setState({
+        [galleryName]: urlArr
+      })
+    })
+  }
+
+  render () {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <Home mainImages={this.state.mainGalleryImages} toolsImages={this.state.toolsGalleryImages}/>
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
